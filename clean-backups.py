@@ -204,7 +204,7 @@ parser.add_argument(
     type=int,
     default=DEFAULT_DAY_OF_MONTH,
     metavar="N",
-    help=f"day of month for monthly backups, dafault: {DEFAULT_DAY_OF_MONTH}"
+    help=f"day of month for monthly backups, default: {DEFAULT_DAY_OF_MONTH}"
 )
 # force removal
 parser.add_argument(
