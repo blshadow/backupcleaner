@@ -130,7 +130,12 @@ class BackupFile():
             self.remove(force_remove = force_remove)
 
 # Argument parser
-parser = argparse.ArgumentParser(description="Cleanup old backups")
+parser = argparse.ArgumentParser(
+    description = "Cleanup old backups",
+    epilog = "For a complete timestamp format description, see the python strftime() " +
+             "documentation: https://docs.python.org/3/library/datetime.html" +
+             "#strftime-strptime-behavior"
+)
 # path argument
 parser.add_argument(
     "path",

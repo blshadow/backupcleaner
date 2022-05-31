@@ -19,3 +19,5 @@ optional arguments:
   -t FORMAT, --timestamp-format FORMAT
                      format of timestamp, default: %Y%m%d
 ```
+
+For a complete timestamp format description, see the python strftime() documentation: <https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior>
