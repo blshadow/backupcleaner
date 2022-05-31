@@ -8,6 +8,7 @@ import argparse
 DEFAULT_DAILY = 7
 DEFAULT_WEEKLY = 4
 DEFAULT_MONTHLY = 3
+DEFAULT_TIMESTAMP_FORMAT = "%Y%m%d"
 
 class BackupFile():
     """
@@ -168,6 +169,16 @@ parser.add_argument(
     action="store_true",
     help = "suppress remove confirmation"
 )
+# timestamp format
+parser.add_argument(
+    "-t",
+    "--timestamp-format",
+    type = str,
+    default = DEFAULT_TIMESTAMP_FORMAT,
+    metavar = "FORMAT",
+    help = f"format of timestamp, default: {DEFAULT_TIMESTAMP_FORMAT}".replace(r"%",r"%%")
+
+)
 args = parser.parse_args()
 
 daily = args.daily
@@ -175,9 +186,15 @@ weekly = args.weekly
 monthly = args.monthly
 force = args.force
 directory = args.path[0]
+timestamp_format = args.timestamp_format
 
 # File processing
-files = BackupFile(retention_daily = daily, retention_weekly = weekly, retention_monthly = monthly)
+files = BackupFile(
+    retention_daily = daily,
+    retention_weekly = weekly,
+    retention_monthly = monthly,
+    dateformat = timestamp_format
+)
 # Generate file list with full paths
 paths = [
     os.path.join(directory, f) for f in os.listdir(directory)

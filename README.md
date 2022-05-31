@@ -16,4 +16,6 @@ optional arguments:
   -w N, --weekly N   keep N weekly backups, default: 4
   -m N, --monthly N  keep N monthly backups, default: 3
   -f, --force        suppress remove confirmation
+  -t FORMAT, --timestamp-format FORMAT
+                     format of timestamp, default: %Y%m%d
 ```
