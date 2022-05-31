@@ -1,86 +1,132 @@
 #!/usr/bin/env python3
-from calendar import week
+"""Backup rotation script"""
 from datetime import date, timedelta
 import os
 import argparse
 
 # Default retention parameters
-default_daily = 7
-default_weekly = 4
-default_monthly = 3
+DEFAULT_DAILY = 7
+DEFAULT_WEEKLY = 4
+DEFAULT_MONTHLY = 3
 
-class backupFile():
-    def __init__(self, daily, weekly, monthly, path = None, dateformat = "%Y%m%d") -> None:
-        self.path = path
-        self.daily = daily
-        self.weekly = weekly
-        self.monthly = monthly
+class BackupFile():
+    """
+    Manipulations with backup files
+
+    Arguments:
+        * retention_daily       - daily renention period
+        * retention_weekly      - weekly retention period
+        * retention_monthly     - monthly retention perod
+        * file_path (optional)  - file path
+        * dateformat (optional) - format of timestamps (default is '%Y%m%d')
+    """
+    def __init__(
+        self,
+        retention_daily,
+        retention_weekly,
+        retention_monthly,
+        file_path = None,
+        dateformat = "%Y%m%d") -> None:
+
+        self.file_path = file_path
+        self.daily = retention_daily
+        self.weekly = retention_weekly
+        self.monthly = retention_monthly
         self.dateformat = dateformat
         curr_date = date.today() # Maybe this will be used to specify date as starting point...
-        if self.path == None:
-            self.filename = None
+        if self.file_path is None:
+            self.file_name = None
         else:
-            self.filename = os.path.basename(path)
+            self.file_name = os.path.basename(self.file_path)
         dates = []
-
         # Daily
-        for i in range(0, daily):
+        for i in range(0, self.daily):
             day = curr_date - timedelta(days = i)
             dates.append(day)
         # Weekly
         monday = curr_date - timedelta(days=date.weekday(curr_date))
-        for i in range(0,weekly):
+        for i in range(0,self.weekly):
             day = monday - timedelta( days = (i * 7))
             if day not in dates:
                 dates.append(day)
         # Monthly
         day = curr_date.replace(day=1)
-        for i in range(0,monthly):
+        for i in range(0,self.monthly):
             if day not in dates:
                 dates.append(day)
             day = (day - timedelta(days=1)).replace(day=1)
         self.dates = dates
 
-    def newFile(self, path, daily = None, weekly = None, monthly = None, dateformat = None):
-        if daily == None: daily = self.daily
-        if weekly == None: weekly = self.weekly
-        if monthly == None: monthly = self.monthly
-        if dateformat == None: dateformat = self.dateformat
-        newfile = backupFile(daily, weekly, monthly, path, dateformat)
-        return(newfile)
+    def new_file(
+        self,
+        file_path,
+        retention_daily = None,
+        retention_weekly = None,
+        retention_monthly = None,
+        dateformat = None):
+        """
+        Create new instance of BackupFile, can be used for retention settings inheritance.
+        """
+
+        if retention_daily is None:
+            retention_daily = self.daily
+        if retention_weekly is None:
+            retention_weekly = self.weekly
+        if retention_monthly is None:
+            retention_monthly = self.monthly
+        if dateformat is None:
+            dateformat = self.dateformat
+        new_file = BackupFile(
+            retention_daily,
+            retention_weekly,
+            retention_monthly,
+            file_path,
+            dateformat
+        )
+        return new_file
 
     def __str__(self):
-        val = "<{path}>".format(
-            path = self.path,
-        )
-        return(val)
+        val = f"<{self.file_path}>"
+        return val
 
-    def needRemove(self):
-        if self.filename == None:
+    def need_remove(self):
+        """
+        Check if file is too old and needs to remove.
+        """
+        if self.file_name is None:
             need_remove = False
         else:
             need_remove = True
-            for date in self.dates:
-                if date.strftime(self.dateformat) in self.filename:
+            for single_date in self.dates:
+                if single_date.strftime(self.dateformat) in self.file_name:
                     need_remove = False
                     break
-        return(need_remove)
-    
-    def remove(self, force = False):
-        print("Removing {file}...".format(file = self))
+        return need_remove
+
+    def remove(self, force_remove = False):
+        """
+        Remove file
+
+        Arguments:
+            * force_remove  - suppress remove confirmation
+        """
+        print(f"Removing {self}...")
         # Check force option
-        if force:
-            os.unlink(self.path)
+        if force_remove:
+            os.unlink(self.file_path)
         else:
             # Remove interactively
             print("Are you sure? (y/n) ", end="")
             answer = input()
             if answer == "y":
-                os.unlink(self.path)
-    
-    def removeIfNeeded(self, force = False):
-        if self.needRemove():
-            self.remove(force = force)
+                os.unlink(self.file_path)
+
+    def remove_if_needed(self, force_remove = False):
+        """
+        Remove file if it's too old.
+        """
+        if self.need_remove():
+            self.remove(force_remove = force_remove)
 
 # Argument parser
 parser = argparse.ArgumentParser(description="Cleanup old backups")
@@ -96,31 +142,25 @@ parser.add_argument(
 parser.add_argument(
     "-d", "--daily",
     type = int,
-    default = default_daily,
+    default = DEFAULT_DAILY,
     metavar = "N",
-    help = "keep N daily backups, default: {default_daily}".format(
-        default_daily = default_daily
-    )
+    help = f"keep N daily backups, default: {DEFAULT_DAILY}"
 )
 # weekly argument
 parser.add_argument(
     "-w", "--weekly",
     type = int,
-    default = default_weekly,
+    default = DEFAULT_WEEKLY,
     metavar = "N",
-    help = "keep N weekly backups, default: {default_weekly}".format(
-        default_weekly = default_weekly
-    )
+    help = f"keep N weekly backups, default: {DEFAULT_WEEKLY}"
 )
 # monthly argument
 parser.add_argument(
     "-m", "--monthly",
     type = int,
-    default = default_monthly,
+    default = DEFAULT_MONTHLY,
     metavar = "N",
-    help = "keep N monthly backups, default: {default_monthly}".format(
-        default_monthly = default_monthly
-    )
+    help = f"keep N monthly backups, default: {DEFAULT_MONTHLY}"
 )
 # force removal
 parser.add_argument(
@@ -137,9 +177,12 @@ force = args.force
 directory = args.path[0]
 
 # File processing
-files = backupFile(daily = daily, weekly = weekly, monthly = monthly)
+files = BackupFile(retention_daily = daily, retention_weekly = weekly, retention_monthly = monthly)
 # Generate file list with full paths
-paths = [os.path.join(directory, f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+paths = [
+    os.path.join(directory, f) for f in os.listdir(directory)
+    if os.path.isfile(os.path.join(directory, f))
+]
 for path in paths:
-    f = files.newFile(path)
-    f.removeIfNeeded(force = force)
+    f = files.new_file(path)
+    f.remove_if_needed(force_remove = force)
