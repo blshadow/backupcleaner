@@ -2,7 +2,7 @@
 
 Tool to cleanup backup directory with daily, weekly and monthly backups.
 
-```
+```text
 usage: clean-backups.py [-h] [-d N] [-w N] [-m N] [-f] PATH
 
 Cleanup old backups
