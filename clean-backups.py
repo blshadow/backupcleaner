@@ -177,7 +177,6 @@ parser.add_argument(
     default = DEFAULT_TIMESTAMP_FORMAT,
     metavar = "FORMAT",
     help = f"format of timestamp, default: {DEFAULT_TIMESTAMP_FORMAT}".replace(r"%",r"%%")
-
 )
 args = parser.parse_args()
 
