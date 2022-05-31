@@ -46,7 +46,7 @@ class backupFile():
         if weekly == None: weekly = self.weekly
         if monthly == None: monthly = self.monthly
         if dateformat == None: dateformat = self.dateformat
-        newfile = backupFile(daily, weekly, monthly, path)
+        newfile = backupFile(daily, weekly, monthly, path, dateformat)
         return(newfile)
 
     def __str__(self):
