@@ -1,6 +1,11 @@
 # backupcleaner
 
 Tool to cleanup backup directory with daily, weekly and monthly backups.
+This tool removes **everything** in the specified directory (not recursively) except files, containing timestamps in the filename that can identified by this tool as fresh backups.
+
+By default, this tool keeps last 7 daily backups, 4 weekly backups (4 last monday backups) and 3 monthly backups (1st day of last 3 months). You can redefine this by command line parameters.
+
+This tool expects timestamps like this: 20220531 (May 31, 2022), but of course, you can redefine this.
 
 ```text
 usage: clean-backups.py [-h] [-d N] [-w N] [-m N] [-f] PATH
