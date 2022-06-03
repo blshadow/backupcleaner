@@ -10,14 +10,15 @@ DEFAULT_WEEKLY = 4
 DEFAULT_MONTHLY = 3
 DEFAULT_TIMESTAMP_FORMAT = "%Y%m%d"
 
-class BackupFile():
+
+class BackupFile:
     """
     Manipulations with backup files
 
     Arguments:
-        * retention_daily       - daily renention period
+        * retention_daily       - daily retention period
         * retention_weekly      - weekly retention period
-        * retention_monthly     - monthly retention perod
+        * retention_monthly     - monthly retention period
         * file_path (optional)  - file path
         * dateformat (optional) - format of timestamps (default is '%Y%m%d')
     """
@@ -26,15 +27,15 @@ class BackupFile():
         retention_daily,
         retention_weekly,
         retention_monthly,
-        file_path = None,
-        dateformat = "%Y%m%d") -> None:
-
+        file_path=None,
+        dateformat="%Y%m%d"
+    ) -> None:
         self.file_path = file_path
         self.daily = retention_daily
         self.weekly = retention_weekly
         self.monthly = retention_monthly
         self.dateformat = dateformat
-        curr_date = date.today() # Maybe this will be used to specify date as starting point...
+        curr_date = date.today()  # Maybe this will be used to specify date as starting point...
         if self.file_path is None:
             self.file_name = None
         else:
@@ -42,17 +43,17 @@ class BackupFile():
         dates = []
         # Daily
         for i in range(0, self.daily):
-            day = curr_date - timedelta(days = i)
+            day = curr_date - timedelta(days=i)
             dates.append(day)
         # Weekly
         monday = curr_date - timedelta(days=date.weekday(curr_date))
-        for i in range(0,self.weekly):
-            day = monday - timedelta( days = (i * 7))
+        for i in range(0, self.weekly):
+            day = monday - timedelta(days=(i*7))
             if day not in dates:
                 dates.append(day)
         # Monthly
         day = curr_date.replace(day=1)
-        for i in range(0,self.monthly):
+        for i in range(0, self.monthly):
             if day not in dates:
                 dates.append(day)
             day = (day - timedelta(days=1)).replace(day=1)
@@ -61,14 +62,14 @@ class BackupFile():
     def new_file(
         self,
         file_path,
-        retention_daily = None,
-        retention_weekly = None,
-        retention_monthly = None,
-        dateformat = None):
+        retention_daily=None,
+        retention_weekly=None,
+        retention_monthly=None,
+        dateformat=None
+    ):
         """
         Create new instance of BackupFile, can be used for retention settings inheritance.
         """
-
         if retention_daily is None:
             retention_daily = self.daily
         if retention_weekly is None:
@@ -104,7 +105,7 @@ class BackupFile():
                     break
         return need_remove
 
-    def remove(self, force_remove = False):
+    def remove(self, force_remove=False):
         """
         Remove file
 
@@ -122,66 +123,67 @@ class BackupFile():
             if answer == "y":
                 os.unlink(self.file_path)
 
-    def remove_if_needed(self, force_remove = False):
+    def remove_if_needed(self, force_remove=False):
         """
         Remove file if it's too old.
         """
         if self.need_remove():
-            self.remove(force_remove = force_remove)
+            self.remove(force_remove=force_remove)
+
 
 # Argument parser
 parser = argparse.ArgumentParser(
-    description = "Cleanup old backups",
-    epilog = "For a complete timestamp format description, see the python strftime() " +
-             "documentation: https://docs.python.org/3/library/datetime.html" +
-             "#strftime-strptime-behavior"
+    description="Cleanup old backups",
+    epilog="For a complete timestamp format description, see the python strftime() " +
+           "documentation: https://docs.python.org/3/library/datetime.html" +
+           "#strftime-strptime-behavior"
 )
 # path argument
 parser.add_argument(
     "path",
-    metavar = "PATH",
-    type = str,
-    nargs = 1,
-    help = "directory path"
+    metavar="PATH",
+    type=str,
+    nargs=1,
+    help="directory path"
 )
 # daily argument
 parser.add_argument(
     "-d", "--daily",
-    type = int,
-    default = DEFAULT_DAILY,
-    metavar = "N",
-    help = f"keep N daily backups, default: {DEFAULT_DAILY}"
+    type=int,
+    default=DEFAULT_DAILY,
+    metavar="N",
+    help=f"keep N daily backups, default: {DEFAULT_DAILY}"
 )
 # weekly argument
 parser.add_argument(
     "-w", "--weekly",
-    type = int,
-    default = DEFAULT_WEEKLY,
-    metavar = "N",
-    help = f"keep N weekly backups, default: {DEFAULT_WEEKLY}"
+    type=int,
+    default=DEFAULT_WEEKLY,
+    metavar="N",
+    help=f"keep N weekly backups, default: {DEFAULT_WEEKLY}"
 )
 # monthly argument
 parser.add_argument(
     "-m", "--monthly",
-    type = int,
-    default = DEFAULT_MONTHLY,
-    metavar = "N",
-    help = f"keep N monthly backups, default: {DEFAULT_MONTHLY}"
+    type=int,
+    default=DEFAULT_MONTHLY,
+    metavar="N",
+    help=f"keep N monthly backups, default: {DEFAULT_MONTHLY}"
 )
 # force removal
 parser.add_argument(
     "-f", "--force",
     action="store_true",
-    help = "suppress remove confirmation"
+    help="suppress remove confirmation"
 )
 # timestamp format
 parser.add_argument(
     "-t",
     "--timestamp-format",
-    type = str,
-    default = DEFAULT_TIMESTAMP_FORMAT,
-    metavar = "FORMAT",
-    help = f"format of timestamp, default: {DEFAULT_TIMESTAMP_FORMAT}".replace(r"%",r"%%")
+    type=str,
+    default=DEFAULT_TIMESTAMP_FORMAT,
+    metavar="FORMAT",
+    help=f"format of timestamp, default: {DEFAULT_TIMESTAMP_FORMAT}".replace(r"%", r"%%")
 )
 args = parser.parse_args()
 
@@ -194,10 +196,10 @@ timestamp_format = args.timestamp_format
 
 # File processing
 files = BackupFile(
-    retention_daily = daily,
-    retention_weekly = weekly,
-    retention_monthly = monthly,
-    dateformat = timestamp_format
+    retention_daily=daily,
+    retention_weekly=weekly,
+    retention_monthly=monthly,
+    dateformat=timestamp_format
 )
 # Generate file list with full paths
 paths = [
@@ -206,4 +208,4 @@ paths = [
 ]
 for path in paths:
     f = files.new_file(path)
-    f.remove_if_needed(force_remove = force)
+    f.remove_if_needed(force_remove=force)
