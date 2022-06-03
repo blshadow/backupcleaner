@@ -15,50 +15,50 @@ DEFAULT_TIMESTAMP_FORMAT = "%Y%m%d"
 # Argument parser
 parser = argparse.ArgumentParser(
     description="Cleanup old backups",
-    epilog = "For a complete timestamp format description, see the python strftime() " +
-             "documentation: https://docs.python.org/3/library/datetime.html" +
-             "#strftime-strptime-behavior"
+    epilog="For a complete timestamp format description, see the python strftime() " +
+           "documentation: https://docs.python.org/3/library/datetime.html" +
+           "#strftime-strptime-behavior"
 )
 # path argument
 parser.add_argument(
     "path",
-    metavar = "PATH",
-    type = str,
-    nargs = 1,
-    help = "directory path"
+    metavar="PATH",
+    type=str,
+    nargs=1,
+    help="directory path"
 )
 # number of files
 parser.add_argument(
     "-n", "--number-of-files",
-    type = int,
-    default = DEFAULT_NUMBER_OF_FILES,
-    metavar = "N",
-    help = f"generate N files, default: {DEFAULT_NUMBER_OF_FILES}"
+    type=int,
+    default=DEFAULT_NUMBER_OF_FILES,
+    metavar="N",
+    help=f"generate N files, default: {DEFAULT_NUMBER_OF_FILES}"
 )
 # prefix argument
 parser.add_argument(
     "-p", "--prefix",
-    type = str,
-    default = DEFAULT_PREFIX,
-    metavar = "PREFIX",
-    help = f"use PREFIX as file name prefix, default: {DEFAULT_PREFIX}"
+    type=str,
+    default=DEFAULT_PREFIX,
+    metavar="PREFIX",
+    help=f"use PREFIX as file name prefix, default: {DEFAULT_PREFIX}"
 )
 # suffix argument
 parser.add_argument(
     "-s", "--suffix",
-    type = str,
-    default = DEFAULT_SUFFIX,
-    metavar = "SUFFIX",
-    help = f"use SUFFIX as file name suffix, default: {DEFAULT_SUFFIX}"
+    type=str,
+    default=DEFAULT_SUFFIX,
+    metavar="SUFFIX",
+    help=f"use SUFFIX as file name suffix, default: {DEFAULT_SUFFIX}"
 )
 # timestamp format
 parser.add_argument(
     "-t",
     "--timestamp-format",
-    type = str,
-    default = DEFAULT_TIMESTAMP_FORMAT,
-    metavar = "FORMAT",
-    help = f"format of timestamp, default: {DEFAULT_TIMESTAMP_FORMAT}".replace(r"%",r"%%")
+    type=str,
+    default=DEFAULT_TIMESTAMP_FORMAT,
+    metavar="FORMAT",
+    help=f"format of timestamp, default: {DEFAULT_TIMESTAMP_FORMAT}".replace(r"%", r"%%")
 )
 
 args = parser.parse_args()
