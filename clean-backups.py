@@ -176,6 +176,12 @@ parser.add_argument(
     action="store_true",
     help="suppress remove confirmation"
 )
+# force removal
+parser.add_argument(
+    "-r", "--recursive",
+    action="store_true",
+    help="remove files recursively"
+)
 # timestamp format
 parser.add_argument(
     "-t",
@@ -190,22 +196,26 @@ args = parser.parse_args()
 daily = args.daily
 weekly = args.weekly
 monthly = args.monthly
+recursive = args.recursive
 force = args.force
 directory = args.path[0]
 timestamp_format = args.timestamp_format
 
+#
 # File processing
+#
+
+# Create BackupFile object with retention settings
 files = BackupFile(
     retention_daily=daily,
     retention_weekly=weekly,
     retention_monthly=monthly,
     dateformat=timestamp_format
 )
-# Generate file list with full paths
-paths = [
-    os.path.join(directory, f) for f in os.listdir(directory)
-    if os.path.isfile(os.path.join(directory, f))
-]
-for path in paths:
-    f = files.new_file(path)
-    f.remove_if_needed(force_remove=force)
+# Walk through subdirectory tree
+for root, dirs, filenames in os.walk(directory):
+    for filename in filenames:
+        f = files.new_file(os.path.join(root, filename))
+        f.remove_if_needed(force_remove=force)
+    if not recursive:
+        break
