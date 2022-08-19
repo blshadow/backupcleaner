@@ -22,6 +22,8 @@ optional arguments:
   -d N, --daily N       keep N daily backups, default: 7
   -w N, --weekly N      keep N weekly backups, default: 4
   -m N, --monthly N     keep N monthly backups, default: 3
+  --day-of-week N       day of week for weekly backups, 0 for monday, 6 for sunday, default: 0
+  --day-of-month N      day of month for monthly backups, dafault: 1
   -f, --force           suppress remove confirmation
   -r, --recursive       remove files recursively
   -t FORMAT, --timestamp-format FORMAT

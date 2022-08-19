@@ -9,6 +9,8 @@ DEFAULT_DAILY = 7
 DEFAULT_WEEKLY = 4
 DEFAULT_MONTHLY = 3
 DEFAULT_TIMESTAMP_FORMAT = "%Y%m%d"
+DEFAULT_DAY_OF_WEEK = 0
+DEFAULT_DAY_OF_MONTH = 1
 
 
 class BackupFile:
@@ -16,17 +18,21 @@ class BackupFile:
     Manipulations with backup files
 
     Arguments:
-        * retention_daily       - daily retention period
-        * retention_weekly      - weekly retention period
-        * retention_monthly     - monthly retention period
-        * file_path (optional)  - file path
-        * dateformat (optional) - format of timestamps (default is '%Y%m%d')
+        * retention_daily           - daily retention period
+        * retention_weekly          - weekly retention period
+        * retention_monthly         - monthly retention period
+        * retention_day_of_week     - day of week for weekly backups
+        * retention_day_of_month    - day of month for monthly backups
+        * file_path (optional)      - file path
+        * dateformat (optional)     - format of timestamps (default is '%Y%m%d')
     """
     def __init__(
         self,
         retention_daily,
         retention_weekly,
         retention_monthly,
+        retention_day_of_week=0,
+        retention_day_of_month=1,
         file_path=None,
         dateformat="%Y%m%d"
     ) -> None:
@@ -34,6 +40,8 @@ class BackupFile:
         self.daily = retention_daily
         self.weekly = retention_weekly
         self.monthly = retention_monthly
+        self.day_of_week = retention_day_of_week
+        self.day_of_month = retention_day_of_month
         self.dateformat = dateformat
         curr_date = date.today()  # Maybe this will be used to specify date as starting point...
         if self.file_path is None:
@@ -46,17 +54,21 @@ class BackupFile:
             day = curr_date - timedelta(days=i)
             dates.append(day)
         # Weekly
-        monday = curr_date - timedelta(days=date.weekday(curr_date))
+        weekly_day = curr_date - timedelta(days=date.weekday(curr_date)) + timedelta(days=self.day_of_week)
+        if weekly_day > curr_date:
+            weekly_day = weekly_day - timedelta(days=7)
         for i in range(0, self.weekly):
-            day = monday - timedelta(days=(i*7))
+            day = weekly_day - timedelta(days=(i*7))
             if day not in dates:
                 dates.append(day)
         # Monthly
-        day = curr_date.replace(day=1)
+        day = curr_date.replace(day=self.day_of_month)
+        if day > curr_date:
+            day = (day.replace(day=1) - timedelta(days=1)).replace(day=self.day_of_month)
         for i in range(0, self.monthly):
             if day not in dates:
                 dates.append(day)
-            day = (day - timedelta(days=1)).replace(day=1)
+            day = (day.replace(day=1) - timedelta(days=1)).replace(day=self.day_of_month)
         self.dates = dates
 
     def new_file(
@@ -65,6 +77,8 @@ class BackupFile:
         retention_daily=None,
         retention_weekly=None,
         retention_monthly=None,
+        retention_day_of_week=None,
+        retention_day_of_month=None,
         dateformat=None
     ):
         """
@@ -76,12 +90,18 @@ class BackupFile:
             retention_weekly = self.weekly
         if retention_monthly is None:
             retention_monthly = self.monthly
+        if retention_day_of_week is None:
+            retention_day_of_week = self.day_of_week
+        if retention_day_of_month is None:
+            retention_day_of_month = self.day_of_month
         if dateformat is None:
             dateformat = self.dateformat
         new_file = BackupFile(
             retention_daily,
             retention_weekly,
             retention_monthly,
+            retention_day_of_week,
+            retention_day_of_month,
             file_path,
             dateformat
         )
@@ -170,6 +190,22 @@ parser.add_argument(
     metavar="N",
     help=f"keep N monthly backups, default: {DEFAULT_MONTHLY}"
 )
+# day of week for weekly backups
+parser.add_argument(
+    "--day-of-week",
+    type=int,
+    default=DEFAULT_DAY_OF_WEEK,
+    metavar="N",
+    help=f"day of week for weekly backups, 0 for monday, 6 for sunday, default: {DEFAULT_DAY_OF_WEEK}"
+)
+# day of month for monthly backups
+parser.add_argument(
+    "--day-of-month",
+    type=int,
+    default=DEFAULT_DAY_OF_MONTH,
+    metavar="N",
+    help=f"day of month for monthly backups, dafault: {DEFAULT_DAY_OF_MONTH}"
+)
 # force removal
 parser.add_argument(
     "-f", "--force",
@@ -196,6 +232,8 @@ args = parser.parse_args()
 daily = args.daily
 weekly = args.weekly
 monthly = args.monthly
+day_of_week = args.day_of_week
+day_of_month = args.day_of_month
 recursive = args.recursive
 force = args.force
 directory = args.path[0]
@@ -210,6 +248,8 @@ files = BackupFile(
     retention_daily=daily,
     retention_weekly=weekly,
     retention_monthly=monthly,
+    retention_day_of_week=day_of_week,
+    retention_day_of_month=day_of_month,
     dateformat=timestamp_format
 )
 # Walk through subdirectory tree
